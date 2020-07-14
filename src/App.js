@@ -1,6 +1,6 @@
 import React from 'react';
 import {Switch, Route} from 'react-router-dom';
-
+import {connect} from 'react-redux'
 import './App.css';
 
 import HomePage from './pages/homepage/homepage.component';
@@ -9,19 +9,15 @@ import SignInAndSignUpPage from './pages/sign-in-and-sign-up/sign-in-and-sign-up
 import Header from './components/header/header.component.jsx';
 import {auth, createUserProfileDocument} from './firebase/firebase.utils';
 
-class App extends React.Component{
+import {setCurrentUser } from './redux/user/user.actions'
 
-  constructor(){
-    super();
-    
-    this.state = {
-      currentUser: null
-    }
-  }
+class App extends React.Component{
 
   unsubscribeFromAuth = null
 
   componentDidMount(){
+    const{setCurrentUser} = this.props;
+
     this.unsubscribeFromAuth = auth.onAuthStateChanged(async userAuth =>{
       //if we're signing in
       if(userAuth){
@@ -32,22 +28,15 @@ class App extends React.Component{
         userRef.onSnapshot(snapShot => {
           //.data gives us the properties 
           //creates new object that has id and properties
-          this.setState({
-            currentUser:{
+          setCurrentUser({
               id: snapShot.id,
               ...snapShot.data()
-            }
-          }, 
-            () => {
-              console.log(this.state);
-            }
-          )
+            })
         });
-        console.log(this.state);
       }
       //if we're signing out, this sets currentUser to null
       else{
-        this.setState({currentUser: userAuth});
+        setCurrentUser(userAuth);
       }
     }) 
   }
@@ -59,7 +48,7 @@ class App extends React.Component{
   render(){
     return (
       <div>
-        <Header currentUser = {this.state.currentUser}/>
+        <Header/>
         <Switch>
           <Route exact path = '/' component = {HomePage}/>
           <Route exact path = '/shop' component = {ShopPage}/>
@@ -70,4 +59,12 @@ class App extends React.Component{
   }
 }
 
-export default App;
+//return setCurrentUser which goes to a function that gets the user object then calls dispatch
+  //dispatch is a way to let redux know that whatevery you're passing is an action object that gets passed to every reducer
+const mapDispatchToProps = dispatch => ({
+  setCurrentUser: user => dispatch(setCurrentUser(user))
+})
+
+//doesn't do anything with the component itself (user) outside of setting it so we can set it null as first argument,
+//2nd argument is mapDispatchToProps
+export default connect(null, mapDispatchToProps)(App);

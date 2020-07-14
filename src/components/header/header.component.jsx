@@ -1,6 +1,9 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
 
+//lets us modify our component to have access to redux
+import {connect} from 'react-redux';
+
 import {auth} from '../../firebase/firebase.utils';
 
 import {ReactComponent as Logo} from '../../assets/crown.svg';
@@ -31,4 +34,10 @@ const Header = ({currentUser}) => (
     </div>
 )
 
-export default Header;
+//allows us to access the root reducer
+const mapStateToProps = state => ({
+    currentUser: state.user.currentUser
+})
+
+//first arguent is the function that allows us to access the root reducer
+export default connect(mapStateToProps)(Header);
