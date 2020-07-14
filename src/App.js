@@ -1,5 +1,5 @@
 import React from 'react';
-import {Switch, Route} from 'react-router-dom';
+import {Switch, Route,Redirect} from 'react-router-dom';
 import {connect} from 'react-redux'
 import './App.css';
 
@@ -9,7 +9,7 @@ import SignInAndSignUpPage from './pages/sign-in-and-sign-up/sign-in-and-sign-up
 import Header from './components/header/header.component.jsx';
 import {auth, createUserProfileDocument} from './firebase/firebase.utils';
 
-import {setCurrentUser } from './redux/user/user.actions'
+import {setCurrentUser} from './redux/user/user.actions'
 
 class App extends React.Component{
 
@@ -51,13 +51,29 @@ class App extends React.Component{
         <Header/>
         <Switch>
           <Route exact path = '/' component = {HomePage}/>
-          <Route exact path = '/shop' component = {ShopPage}/>
-          <Route exact path = '/signIn' component = {SignInAndSignUpPage}/>
+          <Route path = '/shop' component = {ShopPage}/>
+          {/* render determines what comopnent to return */}
+          {/*this makes it so people can't access sign in/up page after they log in */}
+          <Route 
+            exact 
+            path = '/signIn' 
+            render = {() => 
+              this.props.currentUser ? (
+                <Redirect to = '/' />
+              ): (
+                <SignInAndSignUpPage/>
+              )
+              }
+            />
         </Switch>
       </div>
     );
   }
 }
+
+const mapStateToProps = ({user}) => ({
+  currentUser: user.currentUser
+})
 
 //return setCurrentUser which goes to a function that gets the user object then calls dispatch
   //dispatch is a way to let redux know that whatevery you're passing is an action object that gets passed to every reducer
@@ -67,4 +83,7 @@ const mapDispatchToProps = dispatch => ({
 
 //doesn't do anything with the component itself (user) outside of setting it so we can set it null as first argument,
 //2nd argument is mapDispatchToProps
-export default connect(null, mapDispatchToProps)(App);
+export default connect(
+  mapStateToProps, //gives access to this.state.currentUser
+   mapDispatchToProps
+   )(App);

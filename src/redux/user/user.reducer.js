@@ -3,6 +3,9 @@
     //action - object that has a type, payload - can be anything
 
 //we set an initial state, because the first time the app fires it userReducer needs a last/initial state
+
+import {UserActionTypes} from './user.types';
+
 const INITIAL_STATE = {
     currentUser: null
 };
@@ -13,7 +16,7 @@ const INITIAL_STATE = {
 //every single reducer gets everysingle action, even if action isn't related to reducer
 const userReducer = (state = INITIAL_STATE,action) => {
     switch(action.type){
-        case 'SET_CURRENT_USER':
+        case UserActionTypes.SET_CURRENT_USER:
             return{
                 ...state,
                 currentUser: action.payload
